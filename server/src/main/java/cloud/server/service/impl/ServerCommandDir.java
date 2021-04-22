@@ -4,16 +4,20 @@ import cloud.server.service.CommandDirectory;
 import cloud.server.service.CommandWork;
 import cloud.server.service.impl.commands.*;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
 public class ServerCommandDir implements CommandDirectory {
     private String currentServerPath = "C:\\galusenitsa_box";
+    File file = new File(currentServerPath);
+
 
     private List<CommandWork> commandWorksList;
     private CommandDirectory commandDirectory;
 
     public ServerCommandDir() {
+        file.mkdir();
         commandDirectory = ServerCommandDir.this;
         commandWorksList = Arrays.asList(new DirectoryBack(commandDirectory),
                 new DirectoryOnward(commandDirectory), new Refresh(commandDirectory),
