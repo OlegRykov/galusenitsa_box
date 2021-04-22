@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import java.net.URL?>
+<VBox fx:controller="cloud.client.controller.CreateFileController"
+      xmlns:fx="http://javafx.com/fxml" alignment="center">
+
+    <stylesheets>
+        <URL value="@/css/style.css"/>
+    </stylesheets>
+
+    <TextArea styleClass="dirStyle" fx:id="textArea" wrapText="true" maxHeight="80" editable="false"/>
+    <TextField styleClass="dirStyle" fx:id="textField" maxHeight="60" />
+    <HBox fx:id="buttonChoice">
+        <Button styleClass="buttonStyle" text="Ок" prefWidth="200" onAction="#isOk"/>
+        <Button styleClass="buttonStyle" text="Отмена" prefWidth="200" onAction="#cancel"/>
+    </HBox>
+    <HBox fx:id="buttonClose" alignment="CENTER" visible="false" managed="false">
+        <Button styleClass="buttonStyle" text="Закрыть" prefWidth="200" onAction="#cancel"/>
+    </HBox>
+
+</VBox>

@@ -1,0 +1,59 @@
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.layout.VBox?>
+<?import java.net.URL?>
+<?import javafx.scene.control.TextArea?>
+<BorderPane fx:controller="cloud.client.controller.MainController"
+            xmlns:fx="http://javafx.com/fxml">
+
+    <stylesheets>
+        <URL value="@/css/style.css"/>
+    </stylesheets>
+
+    <top>
+        <MenuBar>
+            <Menu text="Файл">
+                <MenuItem text="Выход" onAction="#exit"/>
+            </Menu>
+            <Menu text="Настройки">
+                <MenuItem text="Смена пользователя"/>
+                <MenuItem text="Смена пароля"/>
+            </Menu>
+        </MenuBar>
+    </top>
+    <center>
+        <HBox>
+            <VBox>
+                <TextArea styleClass="dirStyle" fx:id="clientDirectory" maxHeight="50" editable="false"/>
+                <ListView styleClass="dirStyle" fx:id="clientFiles" minWidth="400" minHeight="450"/>
+                <HBox>
+                    <Button styleClass="buttonStyle" text="Назад" prefWidth="150" onAction="#backClient"/>
+                    <Button styleClass="buttonStyle" text="Вперед" prefWidth="150" onAction="#onwardClient"/>
+                </HBox>
+            </VBox>
+            <VBox>
+                <TextArea styleClass="dirStyle" fx:id="serverDirectory" maxHeight="50" editable="false"/>
+                <ListView styleClass="dirStyle" fx:id="serverFiles"  minWidth="400" minHeight="450"/>
+                <HBox>
+                    <Button styleClass="buttonStyle" text="Назад" prefWidth="150" onAction="#backServer"/>
+                    <Button styleClass="buttonStyle" text="Вперед" prefWidth="150" onAction="#onwardServer"/>
+                </HBox>
+            </VBox>
+        </HBox>
+    </center>
+    <bottom>
+        <HBox>
+            <Button styleClass="buttonStyle" text="Отправить файл" prefWidth="150" onAction="#sendFile"/>
+            <Button styleClass="buttonStyle" text="Скачать файл" prefWidth="150" onAction="#saveFile"/>
+            <Button styleClass="buttonStyle" text="Создать папку" prefWidth="150" onAction="#createDir"/>
+            <Button styleClass="buttonStyle" text="Удалить файл" prefWidth="150" onAction="#deleteFile"/>
+            <Button styleClass="buttonStyle" text="Обновить" prefWidth="150" onAction="#refresh"/>
+            <Button styleClass="buttonStyle" text="Выход" prefWidth="150" onAction="#exit"/>
+        </HBox>
+    </bottom>
+</BorderPane>
