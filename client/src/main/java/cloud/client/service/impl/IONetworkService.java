@@ -62,12 +62,14 @@ public class IONetworkService implements NetworkService {
 
     @Override
     public void sendFile(File file) {
-        try (InputStream inFile = new BufferedInputStream(new FileInputStream(file))) {
-            out.writeObject(inFile.readAllBytes());
-            out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        new Thread(() -> {
+            try (InputStream inFile = new BufferedInputStream(new FileInputStream(file))) {
+                out.writeObject(inFile.readAllBytes());
+                out.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     @Override
@@ -101,7 +103,7 @@ public class IONetworkService implements NetworkService {
 
     @Override
     public void saveFile(File file, Object uploadFile) {
-        if (!file.exists()){
+        if (!file.exists()) {
             try (OutputStream os = new BufferedOutputStream(new FileOutputStream(file, true))) {
                 os.write((byte[]) uploadFile);
             } catch (Exception ex) {
