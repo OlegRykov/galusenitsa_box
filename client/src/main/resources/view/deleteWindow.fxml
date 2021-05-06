@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import java.net.URL?>
+<VBox fx:controller="cloud.client.controller.DeleteController"
+      xmlns:fx="http://javafx.com/fxml" alignment="center">
+
+    <stylesheets>
+        <URL value="@/css/style.css"/>
+    </stylesheets>
+
+    <TextArea styleClass="dirStyle" fx:id="textArea" wrapText="true" maxHeight="100" editable="false"/>
+    <HBox fx:id="buttonChoice">
+        <Button styleClass="buttonStyle" text="Да" prefWidth="200" onAction="#yesChoice"/>
+        <Button styleClass="buttonStyle" text="Нет" prefWidth="200" onAction="#noChoice"/>
+
+    </HBox>
+    <HBox fx:id="buttonClose" alignment="CENTER" visible="false" managed="false">
+        <Button styleClass="buttonStyle" text="Закрыть" prefWidth="200" onAction="#noChoice"/>
+    </HBox>
+
+</VBox>

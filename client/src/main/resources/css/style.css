@@ -1,0 +1,24 @@
+.root {
+    -fx-background-color: #056603;
+}
+
+.dirStyle {
+    -fx-background-color: #d9db3d;
+    -fx-control-inner-background: #d9db3d;
+    -fx-text-fill: #056603;
+    -fx-padding: 10px;
+    -fx-border-insets: 10px;
+    -fx-background-insets: 10px;
+}
+
+.buttonStyle {
+    -fx-background-color: #d9db3d;
+    -fx-text-fill: #056603;
+    -fx-padding: 10px;
+    -fx-border-insets: 10px;
+    -fx-background-insets: 10px;
+}
+
+.buttonStyle: hover {
+     -fx-background-color: #e5cf05;
+}
