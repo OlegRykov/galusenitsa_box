@@ -1,12 +1,13 @@
 package cloud.client.controller;
 
-import cloud.client.service.AppendText;
+import cloud.client.factory.Factory;
+import cloud.client.service.CommandResultService;
+import cloud.client.service.TextAppenderService;
 import cloud.client.service.NetworkService;
 
 import cloud.commands.Command;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
@@ -23,7 +24,8 @@ public class CreateFileController {
 
     private CyclicBarrier cyclicBarrier;
     private NetworkService networkService;
-    private AppendText appendText;
+    private TextAppenderService appendText;
+    private CommandResultService commandResultService;
 
     @FXML
     public TextArea textArea;
@@ -36,24 +38,23 @@ public class CreateFileController {
 
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
+        commandResultService = Factory.getCommandResultService();
     }
 
     public void isOk(ActionEvent actionEvent) {
         cyclicBarrier = mainController.getCyclicBarrier();
-        networkService = mainController.getNetworkService();
+        networkService = Factory.getNetworkService();
         appendText = mainController.getAppendText();
 
-        networkService.sendCommand(Command.CREATE_DIR + System.lineSeparator() +
+        networkService.sendCommand(Command.CREATE_FILE.name() + System.lineSeparator() +
                 textField.getText());
         try {
             cyclicBarrier.await();
 
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (BrokenBarrierException e) {
+        } catch (InterruptedException | BrokenBarrierException e) {
             e.printStackTrace();
         }
-        appendText.appendTextarea(textArea, mainController.getResult());
+        appendText.appendTextarea(textArea, commandResultService.getResult().toString());
 
         buttonChoice.setVisible(isVisible);
         buttonChoice.setManaged(isVisible);

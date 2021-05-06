@@ -1,7 +1,8 @@
 package cloud.client.controller;
 
-import cloud.client.service.AppendText;
-import cloud.client.service.FilesWork;
+import cloud.client.factory.Factory;
+import cloud.client.service.CommandResultService;
+import cloud.client.service.TextAppenderService;
 import cloud.client.service.NetworkService;
 import cloud.commands.Command;
 import javafx.event.ActionEvent;
@@ -23,7 +24,8 @@ public class DeleteController {
     private CyclicBarrier cyclicBarrier;
     private NetworkService networkService;
     private ListView serverFiles;
-    private AppendText appendText;
+    private TextAppenderService appendText;
+    private CommandResultService commandResultService;
 
     @FXML
     public TextArea textArea;
@@ -34,26 +36,25 @@ public class DeleteController {
 
     public void setMainController(MainController mainController) {
         this.mainController = mainController;
+        commandResultService = Factory.getCommandResultService();
     }
 
     public void yesChoice(ActionEvent actionEvent) {
         cyclicBarrier = mainController.getCyclicBarrier();
-        networkService = mainController.getNetworkService();
+        networkService = Factory.getNetworkService();
         serverFiles = mainController.getServerFiles();
         appendText = mainController.getAppendText();
 
 
-        networkService.sendCommand(Command.DELETE_FILE + System.lineSeparator() +
+        networkService.sendCommand(Command.DELETE_FILE.name() + System.lineSeparator() +
                 serverFiles.getSelectionModel().getSelectedItem().toString());
         try {
             cyclicBarrier.await();
 
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (BrokenBarrierException e) {
+        } catch (InterruptedException | BrokenBarrierException e) {
             e.printStackTrace();
         }
-        appendText.appendTextarea(textArea, mainController.getResult());
+        appendText.appendTextarea(textArea, commandResultService.getResult().toString());
 
         buttonChoice.setVisible(isVisible);
         buttonChoice.setManaged(isVisible);

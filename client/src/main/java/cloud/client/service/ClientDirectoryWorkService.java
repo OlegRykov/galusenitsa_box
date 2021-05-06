@@ -3,7 +3,7 @@ package cloud.client.service;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 
-public interface ClientDirectoryWork {
+public interface ClientDirectoryWorkService {
     //возвращает текущую директорию
     String currentDir(TextArea clientDir);
 

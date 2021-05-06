@@ -1,13 +1,13 @@
 package cloud.client.service.impl;
 
-import cloud.client.service.FilesWork;
+import cloud.client.service.FilesWorkService;
 import javafx.scene.control.ListView;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class ClientFilesList implements FilesWork {
+public class ClientFilesList implements FilesWorkService {
     @Override
     public void filesInCurDir(ListView files, String url) {
         try {

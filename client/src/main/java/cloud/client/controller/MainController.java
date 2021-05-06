@@ -3,6 +3,7 @@ package cloud.client.controller;
 import cloud.client.factory.Factory;
 import cloud.client.service.*;
 import cloud.commands.Command;
+import cloud.commands.CommandConst;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -16,22 +17,19 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.util.ResourceBundle;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
-
 public class MainController implements Initializable {
 
-    private String result = "";
+    private FilesWorkService clientFilesList;
+    private FilesWorkService serverFilesList;
 
-    private FilesWork clientFilesList;
-    private FilesWork serverFilesList;
-
-    private AppendText appendText;
+    private TextAppenderService appendText;
 
     private Stage mainStage;
 
@@ -41,14 +39,14 @@ public class MainController implements Initializable {
     private Stage createFileStage;
     private CreateFileController fileController;
 
-    private ClientDirectoryWork clientDir;
-    private ServerDirectoryWork serverDir;
+    private ClientDirectoryWorkService clientDir;
+    private ServerDirectoryWorkService serverDir;
 
     private CyclicBarrier cyclicBarrier;
 
     private NetworkService networkService;
 
-    final String START_CLIENT_PATH = "/Users";
+    private CommandResultService commandResultService;
 
     @FXML
     public ListView clientFiles;
@@ -75,12 +73,12 @@ public class MainController implements Initializable {
             serverFilesList = Factory.serverFiles();
 
             clientDir = Factory.clientDirectory();
-            clientDir.appendDir(clientDirectory, START_CLIENT_PATH);
+            clientDir.appendDir(clientDirectory, CommandConst.START_CLIENT_PATH);
 
             clientFilesList = Factory.clientFiles();
-            clientFilesList.filesInCurDir(clientFiles, START_CLIENT_PATH);
 
-            createCommandResultHandler();
+            commandResultService = Factory.getCommandResultService();
+            commandResultService.createCommandResultHandler(cyclicBarrier, networkService);
 
             refresh();
 
@@ -88,60 +86,59 @@ public class MainController implements Initializable {
                 exit();
             });
         });
-
-    }
-
-    private void createCommandResultHandler() {
-        new Thread(() -> {
-            byte[] buffer = new byte[1024];
-            while (true) {
-                int countBytes = networkService.commandResult(buffer);
-                result = new String(buffer, 0, countBytes);
-                System.out.println(result);
-                try {
-                    cyclicBarrier.await();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (BrokenBarrierException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-
     }
 
     @FXML
     public void refresh() {
-        Platform.runLater(() -> {
-            clientDir.appendDir(clientDirectory, clientDir.currentDir(clientDirectory));
-            clientFilesList.filesInCurDir(clientFiles, clientDir.currentDir(clientDirectory));
-            try {
-                networkService.sendCommand(Command.SERVER_DIR);
-                cyclicBarrier.await();
-                serverDir.currentDir(serverDirectory, result);
-                networkService.sendCommand(Command.REFRESH);
-                cyclicBarrier.await();
-                serverFilesList.filesInCurDir(serverFiles, result);
+        clientDir.appendDir(clientDirectory, clientDir.currentDir(clientDirectory));
+        clientFilesList.filesInCurDir(clientFiles, clientDir.currentDir(clientDirectory));
+        try {
+            networkService.sendCommand(Command.SERVER_DIRECTORY.name());
+            cyclicBarrier.await();
+            serverDir.currentDir(serverDirectory, commandResultService.getResult().toString());
+            networkService.sendCommand(Command.REFRESH.name());
+            cyclicBarrier.await();
+            serverFilesList.filesInCurDir(serverFiles, commandResultService.getResult().toString());
 
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (BrokenBarrierException e) {
-                e.printStackTrace();
-            }
-        });
-        System.out.println(Command.REFRESH);
+        } catch (InterruptedException | BrokenBarrierException e) {
+            e.printStackTrace();
+        }
     }
-
 
     @FXML
     public void sendFile(ActionEvent actionEvent) {
-
-        System.out.println(Command.SEND_FILE);
+        String item = String.valueOf(clientFiles.getSelectionModel().getSelectedItem());
+        File file = new File(clientDir.currentDir(clientDirectory)
+                , item);
+        if (file.isFile()) {
+            networkService.sendCommand(Command.SEND_FILE.name() + System.lineSeparator() + item);
+            try {
+                cyclicBarrier.await();
+                if (commandResultService.getResult().toString().equals(Command.READY_TO_SEND.name())) {
+                    networkService.sendFile(file);
+                    refresh();
+                }
+            } catch (InterruptedException | BrokenBarrierException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @FXML
     public void saveFile(ActionEvent actionEvent) {
-        System.out.println(Command.SAVE_FILE);
+        String item = String.valueOf(serverFiles.getSelectionModel().getSelectedItem());
+        File file = new File(clientDir.currentDir(clientDirectory), item);
+        networkService.sendCommand(Command.SAVE_FILE.name() + System.lineSeparator() + item);
+        try {
+            cyclicBarrier.await();
+            if (!commandResultService.getResult().toString().equals(Command.WRONG_FILE.name())) {
+                networkService.saveFile(file, commandResultService.getResult());
+                cyclicBarrier.await();
+                refresh();
+            }
+        } catch (InterruptedException | BrokenBarrierException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -152,12 +149,11 @@ public class MainController implements Initializable {
         appendText.appendTextarea(fileController.textArea,
                 "Введите имя файла.");
         createFileStage.show();
-        System.out.println(Command.CREATE_DIR);
     }
 
     @FXML
     public void deleteFile(ActionEvent actionEvent) {
-        if (serverFiles.getSelectionModel().getSelectedItem() != null){
+        if (serverFiles.getSelectionModel().getSelectedItem() != null) {
             String item = serverFiles
                     .getSelectionModel().getSelectedItem().toString();
             if (deleteStage == null) {
@@ -172,62 +168,48 @@ public class MainController implements Initializable {
     @FXML
     public void exit() {
         networkService.closeConnection();
-        System.out.println(Command.EXIT);
         System.exit(0);
     }
 
     @FXML
     public void backClient(ActionEvent actionEvent) {
-        Platform.runLater(() -> {
-            clientDir.appendDir(clientDirectory, clientDir.backDir(clientDirectory));
-            clientFilesList.filesInCurDir(clientFiles, clientDir.currentDir(clientDirectory));
-        });
-
+        clientDir.appendDir(clientDirectory, clientDir.backDir(clientDirectory));
+        clientFilesList.filesInCurDir(clientFiles, clientDir.currentDir(clientDirectory));
     }
 
     @FXML
     public void onwardClient(ActionEvent actionEvent) {
-        Platform.runLater(() -> {
-            clientDir.appendDir(clientDirectory, clientDir.onwardDir(clientDirectory, clientFiles));
-            clientFilesList.filesInCurDir(clientFiles, clientDir.currentDir(clientDirectory));
-        });
-
+        clientDir.appendDir(clientDirectory, clientDir.onwardDir(clientDirectory, clientFiles));
+        clientFilesList.filesInCurDir(clientFiles, clientDir.currentDir(clientDirectory));
     }
 
     @FXML
     public void backServer(ActionEvent actionEvent) {
-        networkService.sendCommand(Command.BACK_SERVER);
+        networkService.sendCommand(Command.DIRECTORY_BACK.name());
         try {
             cyclicBarrier.await();
             refresh();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (BrokenBarrierException e) {
+        } catch (InterruptedException | BrokenBarrierException e) {
             e.printStackTrace();
         }
-
-        System.out.println(Command.BACK_SERVER);
     }
 
     @FXML
     public void onwardServer(ActionEvent actionEvent) {
-        networkService.sendCommand(Command.ONWARD_SERVER  + System.lineSeparator() + serverFiles
+        networkService.sendCommand(Command.DIRECTORY_ONWARD.name() + System.lineSeparator() + serverFiles
                 .getSelectionModel().getSelectedItem());
-
         try {
             cyclicBarrier.await();
             refresh();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (BrokenBarrierException e) {
+        } catch (InterruptedException | BrokenBarrierException e) {
             e.printStackTrace();
         }
-        System.out.println(Command.ONWARD_SERVER);
     }
 
-    public void createDeleteWin(){
+    public void createDeleteWin() {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("view/deleteWindow.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader()
+                    .getResource("view/deleteWindow.fxml"));
             Parent root = fxmlLoader.load();
             deleteStage = new Stage();
             deleteStage.setScene(new Scene(root, 250, 200));
@@ -235,7 +217,6 @@ public class MainController implements Initializable {
             delCon.setMainController(this);
             deleteStage.initModality(Modality.APPLICATION_MODAL);
             deleteStage.initStyle(StageStyle.UTILITY);
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -245,9 +226,10 @@ public class MainController implements Initializable {
         return deleteStage;
     }
 
-    public void createFileWin(){
+    public void createFileWin() {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("view/createFileWindow.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader()
+                    .getResource("view/createFileWindow.fxml"));
             Parent root = fxmlLoader.load();
             createFileStage = new Stage();
             createFileStage.setScene(new Scene(root, 250, 200));
@@ -255,7 +237,6 @@ public class MainController implements Initializable {
             fileController.setMainController(this);
             createFileStage.initModality(Modality.APPLICATION_MODAL);
             createFileStage.initStyle(StageStyle.UTILITY);
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -273,15 +254,7 @@ public class MainController implements Initializable {
         return serverFiles;
     }
 
-    public NetworkService getNetworkService() {
-        return networkService;
-    }
-
-    public String getResult() {
-        return result;
-    }
-
-    public AppendText getAppendText() {
+    public TextAppenderService getAppendText() {
         return appendText;
     }
 }

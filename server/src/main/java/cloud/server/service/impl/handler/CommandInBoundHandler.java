@@ -11,9 +11,12 @@ public class CommandInBoundHandler extends SimpleChannelInboundHandler<String> {
         this.commandDir = commandDir;
     }
 
+
     @Override
     protected void channelRead0(ChannelHandlerContext channelCtx, String command) throws Exception {
-        channelCtx.writeAndFlush(commandDir.commandActive(command));
+        commandDir.setCtx(channelCtx);
 
+            channelCtx.writeAndFlush(commandDir.commandActive(command));
     }
+
 }

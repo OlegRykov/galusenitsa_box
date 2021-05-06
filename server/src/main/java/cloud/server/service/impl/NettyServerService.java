@@ -1,5 +1,6 @@
 package cloud.server.service.impl;
 
+import cloud.commands.CommandConst;
 import cloud.server.factory.Factory;
 import cloud.server.service.CommandDirectory;
 import cloud.server.service.ServerService;
@@ -11,10 +12,9 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
-
-
+import io.netty.handler.codec.serialization.ClassResolvers;
+import io.netty.handler.codec.serialization.ObjectDecoder;
+import io.netty.handler.codec.serialization.ObjectEncoder;
 
 public class NettyServerService implements ServerService {
 
@@ -43,11 +43,15 @@ public class NettyServerService implements ServerService {
                         @Override
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             System.out.println("Клиент подключился");
-                            socketChannel.pipeline().addLast(new StringDecoder(),
-                                    new StringEncoder(), new CommandInBoundHandler(newCommandDir()));
+                            socketChannel.pipeline()
+                                    .addLast("objectEncoder", new ObjectEncoder())
+                                    .addLast("objectDecoder", new ObjectDecoder(CommandConst.MAX_FILE_SIZE,
+                                            ClassResolvers.cacheDisabled(null)))
+                                    .addLast("commandHandler", new CommandInBoundHandler(newCommandDir()));
                         }
                     });
 
+            System.out.println("Сервер запущен");
             ChannelFuture future = bootstrap.bind(SERVER_PORT).sync();
             future.channel().closeFuture().sync();
         } catch (Exception e) {
@@ -59,8 +63,7 @@ public class NettyServerService implements ServerService {
         }
     }
 
-    public CommandDirectory newCommandDir(){
+    public CommandDirectory newCommandDir() {
         return Factory.getCommandDirectory();
     }
-
 }

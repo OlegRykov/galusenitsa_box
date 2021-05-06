@@ -1,13 +1,13 @@
 package cloud.client.service.impl;
 
-import cloud.client.service.ClientDirectoryWork;
+import cloud.client.service.ClientDirectoryWorkService;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class ClientDirectory implements ClientDirectoryWork {
+public class ClientDirectory implements ClientDirectoryWorkService {
 
     @Override
     public String currentDir(TextArea clientDir) {
@@ -23,7 +23,7 @@ public class ClientDirectory implements ClientDirectoryWork {
     public String onwardDir(TextArea clientDir, ListView clientFiles) {
         Path path = Paths.get(clientDir.getText() + "/" + clientFiles.getSelectionModel().
                 getSelectedItem());
-        if (path.toFile().isDirectory()){
+        if (path.toFile().isDirectory()) {
             return path.toString();
         }
 

@@ -1,10 +1,12 @@
 package cloud.client.service.impl;
 
 import cloud.client.service.NetworkService;
+import cloud.commands.CommandConst;
+import io.netty.handler.codec.serialization.ObjectDecoderInputStream;
+import io.netty.handler.codec.serialization.ObjectEncoderOutputStream;
 
 import java.io.*;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 
 public class IONetworkService implements NetworkService {
 
@@ -13,10 +15,8 @@ public class IONetworkService implements NetworkService {
 
     private static IONetworkService clientService;
 
-    public static InputStream in;
-    public static OutputStream out;
-    public static OutputStream outFile;
-    public static InputStream inFile;
+    public static ObjectDecoderInputStream in;
+    public static ObjectEncoderOutputStream out;
 
     public static Socket socket;
 
@@ -35,8 +35,8 @@ public class IONetworkService implements NetworkService {
 
     private static void initializeStreams() {
         try {
-            out = socket.getOutputStream();
-            in = socket.getInputStream();
+            out = new ObjectEncoderOutputStream(socket.getOutputStream());
+            in = new ObjectDecoderInputStream(socket.getInputStream(), CommandConst.MAX_FILE_SIZE);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -51,9 +51,9 @@ public class IONetworkService implements NetworkService {
     }
 
     @Override
-    public void sendCommand(String command) {
+    public void sendCommand(Object command) {
         try {
-            out.write(command.getBytes(StandardCharsets.UTF_8));
+            out.writeObject(command);
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();
@@ -61,13 +61,23 @@ public class IONetworkService implements NetworkService {
     }
 
     @Override
-    public int commandResult(byte[] buffer) {
-        try {
-            return in.read(buffer);
+    public void sendFile(File file) {
+        try (InputStream inFile = new BufferedInputStream(new FileInputStream(file))) {
+            out.writeObject(inFile.readAllBytes());
+            out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return 0;
+    }
+
+    @Override
+    public Object commandResult() {
+        try {
+            return in.readObject();
+        } catch (ClassNotFoundException | IOException e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 
     @Override
@@ -86,6 +96,17 @@ public class IONetworkService implements NetworkService {
             out.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void saveFile(File file, Object uploadFile) {
+        if (!file.exists()){
+            try (OutputStream os = new BufferedOutputStream(new FileOutputStream(file, true))) {
+                os.write((byte[]) uploadFile);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 }
