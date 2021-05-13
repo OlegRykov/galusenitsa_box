@@ -2,14 +2,14 @@ package cloud.server.service.impl.commands;
 
 import cloud.commands.Command;
 import cloud.server.service.CommandDirectory;
-import cloud.server.service.CommandExecuter;
+import cloud.server.service.CommandExecutor;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class CreateFileCommand implements CommandExecuter {
+public class CreateFileCommand implements CommandExecutor {
     private CommandDirectory commandDirectory;
     private Command command;
 

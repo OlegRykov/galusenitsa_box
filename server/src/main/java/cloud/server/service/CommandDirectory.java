@@ -5,7 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 public interface CommandDirectory {
 
     //запускает нужную команду по названию
-    String commandActive(Object command);
+    <T> T commandActive(Object command);
 
     String getServerDir();
 

@@ -3,7 +3,7 @@ package cloud.server.service.impl;
 import cloud.commands.CommandConst;
 import cloud.server.factory.Factory;
 import cloud.server.service.CommandDirectory;
-import cloud.server.service.CommandExecuter;
+import cloud.server.service.CommandExecutor;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.io.File;
@@ -14,8 +14,9 @@ public class ServerCommandDir implements CommandDirectory {
     private String currentServerPath = CommandConst.SERVER_PATH;
     private File file = new File(currentServerPath);
     private ChannelHandlerContext ctx;
+    Object result;
 
-    private final List<CommandExecuter> commandWorksList;
+    private final List<CommandExecutor> commandWorksList;
 
     public ServerCommandDir() {
         file.mkdir();
@@ -23,10 +24,10 @@ public class ServerCommandDir implements CommandDirectory {
     }
 
     @Override
-    public String commandActive(Object command) {
+    public Object commandActive(Object command) {
         int countLimit = 2;
         String[] commandAndInfo = command.toString().split(System.lineSeparator(), countLimit);
-        String result = "";
+
         for (int i = 0; i < commandWorksList.size(); i++) {
             if (commandWorksList.get(i).getCommandName().equals(commandAndInfo[0])) {
                 if (commandAndInfo.length < countLimit) {

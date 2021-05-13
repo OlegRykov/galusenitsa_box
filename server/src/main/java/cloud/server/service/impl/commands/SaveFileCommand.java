@@ -2,15 +2,13 @@ package cloud.server.service.impl.commands;
 
 import cloud.commands.Command;
 import cloud.server.service.CommandDirectory;
-import cloud.server.service.CommandExecuter;
-import io.netty.channel.ChannelHandlerContext;
+import cloud.server.service.CommandExecutor;
 
 import java.io.*;
 
-public class SaveFileCommand implements CommandExecuter {
+public class SaveFileCommand implements CommandExecutor {
     private Command command;
     private CommandDirectory commandDirectory;
-    private ChannelHandlerContext ctx;
 
     public SaveFileCommand(CommandDirectory commandDirectory) {
         command = Command.SAVE_FILE;
@@ -18,15 +16,12 @@ public class SaveFileCommand implements CommandExecuter {
     }
 
     @Override
-    public String commandExecute(Object msg) {
-        ctx = commandDirectory.getCtx();
-
+    public Object commandExecute(Object msg) {
         File file = new File(commandDirectory.getServerDir() +
                 "\\" + msg);
         if (file.isFile()) {
             try (InputStream inFile = new BufferedInputStream(new FileInputStream(file))) {
-                ctx.writeAndFlush(inFile.readAllBytes());
-                return Command.READY_TO_SAVE.name();
+                return inFile.readAllBytes();
             } catch (IOException e) {
                 e.printStackTrace();
             }

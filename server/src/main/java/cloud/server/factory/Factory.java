@@ -1,7 +1,7 @@
 package cloud.server.factory;
 
 import cloud.server.service.CommandDirectory;
-import cloud.server.service.CommandExecuter;
+import cloud.server.service.CommandExecutor;
 import cloud.server.service.ServerService;
 import cloud.server.service.impl.NettyServerService;
 import cloud.server.service.impl.ServerCommandDir;
@@ -20,7 +20,7 @@ public class Factory {
         return new ServerCommandDir();
     }
 
-    public static List<CommandExecuter> commandWorkList(CommandDirectory commandDirectory) {
+    public static List<CommandExecutor> commandWorkList(CommandDirectory commandDirectory) {
         return Arrays.asList(new DirectoryBackCommand(commandDirectory),
                 new DirectoryOnwardCommand(commandDirectory), new RefreshCommand(commandDirectory),
                 new ServerDirectoryCommand(commandDirectory), new DeleteFileCommand(commandDirectory),

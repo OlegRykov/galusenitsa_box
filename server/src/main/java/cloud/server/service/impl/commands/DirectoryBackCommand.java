@@ -2,11 +2,11 @@ package cloud.server.service.impl.commands;
 
 import cloud.commands.Command;
 import cloud.server.service.CommandDirectory;
-import cloud.server.service.CommandExecuter;
+import cloud.server.service.CommandExecutor;
 
 import java.nio.file.Paths;
 
-public class DirectoryBackCommand implements CommandExecuter {
+public class DirectoryBackCommand implements CommandExecutor {
     private CommandDirectory commandDirectory;
     private Command command;
 

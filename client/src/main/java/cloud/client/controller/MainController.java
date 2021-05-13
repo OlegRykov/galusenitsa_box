@@ -36,6 +36,9 @@ public class MainController implements Initializable {
     private Stage deleteStage;
     private DeleteController delCon;
 
+    private Stage infoStage;
+    private InfoWindowController infoWin;
+
     private Stage createFileStage;
     private CreateFileController fileController;
 
@@ -110,13 +113,24 @@ public class MainController implements Initializable {
         String item = String.valueOf(clientFiles.getSelectionModel().getSelectedItem());
         File file = new File(clientDir.currentDir(clientDirectory)
                 , item);
+        if (infoStage == null) {
+            createInfoWindow();
+        }
         if (file.isFile()) {
             networkService.sendCommand(Command.SEND_FILE.name() + System.lineSeparator() + item);
             try {
+                infoStage.show();
                 cyclicBarrier.await();
+
                 if (commandResultService.getResult().toString().equals(Command.READY_TO_SEND.name())) {
-                    networkService.sendFile(file);
-                    refresh();
+                    appendText.appendTextarea(infoWin.textArea, "Идет отправка файла. Пожалуйста подождите.");
+                    Platform.runLater(() -> {
+                        networkService.sendFile(file);
+                        refresh();
+                        appendText.appendTextarea(infoWin.textArea, "Отправка файла прошла успешно.");
+                    });
+                } else {
+                    appendText.appendTextarea(infoWin.textArea, "Не удалось отправить файл.");
                 }
             } catch (InterruptedException | BrokenBarrierException e) {
                 e.printStackTrace();
@@ -128,17 +142,26 @@ public class MainController implements Initializable {
     public void saveFile(ActionEvent actionEvent) {
         String item = String.valueOf(serverFiles.getSelectionModel().getSelectedItem());
         File file = new File(clientDir.currentDir(clientDirectory), item);
-        networkService.sendCommand(Command.SAVE_FILE.name() + System.lineSeparator() + item);
-        try {
-            cyclicBarrier.await();
-            if (!commandResultService.getResult().toString().equals(Command.WRONG_FILE.name())) {
-                networkService.saveFile(file, commandResultService.getResult());
-                cyclicBarrier.await();
-                refresh();
-            }
-        } catch (InterruptedException | BrokenBarrierException e) {
-            e.printStackTrace();
+        if (infoStage == null) {
+            createInfoWindow();
         }
+        infoStage.show();
+        appendText.appendTextarea(infoWin.textArea, "Идет загрузка файла. Пожалуйста ожидайте.");
+        Platform.runLater(() -> {
+            networkService.sendCommand(Command.SAVE_FILE.name() + System.lineSeparator() + item);
+            try {
+                cyclicBarrier.await();
+                if (!commandResultService.getResult().toString().equals(Command.WRONG_FILE.name())) {
+                    networkService.saveFile(file, commandResultService.getResult());
+                    refresh();
+                    appendText.appendTextarea(infoWin.textArea, "Файл успешно загружен.");
+                } else {
+                    appendText.appendTextarea(infoWin.textArea, "Не удалось загрузить файл.");
+                }
+            } catch (InterruptedException | BrokenBarrierException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @FXML
@@ -224,6 +247,26 @@ public class MainController implements Initializable {
 
     public Stage getDeleteStage() {
         return deleteStage;
+    }
+
+    public void createInfoWindow() {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader()
+                    .getResource("view/infoWindow.fxml"));
+            Parent root = fxmlLoader.load();
+            infoStage = new Stage();
+            infoStage.setScene(new Scene(root, 250, 200));
+            infoWin = fxmlLoader.getController();
+            infoWin.setMainController(this);
+            infoStage.initModality(Modality.APPLICATION_MODAL);
+            infoStage.initStyle(StageStyle.UTILITY);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Stage getInfoStage() {
+        return infoStage;
     }
 
     public void createFileWin() {

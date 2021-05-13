@@ -2,9 +2,9 @@ package cloud.server.service.impl.commands;
 
 import cloud.commands.Command;
 import cloud.server.service.CommandDirectory;
-import cloud.server.service.CommandExecuter;
+import cloud.server.service.CommandExecutor;
 
-public class ServerDirectoryCommand implements CommandExecuter {
+public class ServerDirectoryCommand implements CommandExecutor {
     private CommandDirectory commandDirectory;
     private Command command;
 
