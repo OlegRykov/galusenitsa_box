@@ -2,24 +2,24 @@ package cloud.server.service.impl.commands;
 
 import cloud.commands.Command;
 import cloud.server.service.CommandDirectory;
-import cloud.server.service.CommandWork;
+import cloud.server.service.CommandExecuter;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class CreateFile implements CommandWork {
-    private String name;
+public class CreateFileCommand implements CommandExecuter {
     private CommandDirectory commandDirectory;
+    private Command command;
 
-    public CreateFile(CommandDirectory commandDirectory) {
+    public CreateFileCommand(CommandDirectory commandDirectory) {
+        command = Command.CREATE_FILE;
         this.commandDirectory = commandDirectory;
-        name = Command.CREATE_DIR;
     }
 
     @Override
-    public String commandWork(Object msg) {
+    public String commandExecute(Object msg) {
         Path path = Paths.get(commandDirectory.getServerDir() + "\\" + msg);
         try {
             Files.createDirectory(path);
@@ -30,7 +30,7 @@ public class CreateFile implements CommandWork {
     }
 
     @Override
-    public String getName() {
-        return name;
+    public String getCommandName() {
+        return command.name();
     }
 }

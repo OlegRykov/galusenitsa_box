@@ -2,7 +2,7 @@ package cloud.server.service.impl.commands;
 
 import cloud.commands.Command;
 import cloud.server.service.CommandDirectory;
-import cloud.server.service.CommandWork;
+import cloud.server.service.CommandExecuter;
 
 
 import java.io.IOException;
@@ -10,17 +10,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class DeleteFile implements CommandWork {
-    private String name;
+public class DeleteFileCommand implements CommandExecuter {
     private CommandDirectory commandDirectory;
+    private Command command;
 
-    public DeleteFile(CommandDirectory commandDirectory) {
+    public DeleteFileCommand(CommandDirectory commandDirectory) {
+        command = Command.DELETE_FILE;
         this.commandDirectory = commandDirectory;
-        name = Command.DELETE_FILE;
     }
 
     @Override
-    public String commandWork(Object msg) {
+    public String commandExecute(Object msg) {
         Path path = Paths.get(commandDirectory.getServerDir() + "\\" + msg);
         boolean result = false;
         try {
@@ -36,7 +36,7 @@ public class DeleteFile implements CommandWork {
     }
 
     @Override
-    public String getName() {
-        return name;
+    public String getCommandName() {
+        return command.name();
     }
 }

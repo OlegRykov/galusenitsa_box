@@ -1,23 +1,24 @@
 package cloud.client.factory;
 
 import cloud.client.service.*;
+import cloud.client.service.handler.CommandResultHandler;
 import cloud.client.service.impl.*;
 
 public class Factory {
 
-    public static FilesWork clientFiles() {
+    public static FilesWorkService clientFiles() {
         return new ClientFilesList();
     }
 
-    public static FilesWork serverFiles(){
+    public static FilesWorkService serverFiles() {
         return new ServerFileList();
     }
 
-    public static ClientDirectoryWork clientDirectory() {
+    public static ClientDirectoryWorkService clientDirectory() {
         return new ClientDirectory();
     }
 
-    public static ServerDirectoryWork serverDirectoryWork() {
+    public static ServerDirectoryWorkService serverDirectoryWork() {
         return new ServerDirectory();
     }
 
@@ -25,7 +26,11 @@ public class Factory {
         return IONetworkService.getClientService();
     }
 
-    public static AppendText appendText(){
+    public static CommandResultService getCommandResultService() {
+        return CommandResultHandler.getCommandResultHandler();
+    }
+
+    public static TextAppenderService appendText() {
         return new AppendInfo();
     }
 }

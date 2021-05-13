@@ -2,23 +2,23 @@ package cloud.server.service.impl.commands;
 
 import cloud.commands.Command;
 import cloud.server.service.CommandDirectory;
-import cloud.server.service.CommandWork;
+import cloud.server.service.CommandExecuter;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class Refresh implements CommandWork {
-    private String name;
+public class RefreshCommand implements CommandExecuter {
     private CommandDirectory commandDirectory;
+    private Command command;
 
-    public Refresh(CommandDirectory commandDirectory) {
+    public RefreshCommand(CommandDirectory commandDirectory) {
+        command = Command.REFRESH;
         this.commandDirectory = commandDirectory;
-        name = Command.REFRESH;
     }
 
     @Override
-    public String commandWork(Object msg) {
+    public String commandExecute(Object msg) {
         StringBuilder sb = new StringBuilder();
         try {
             Files.list(Paths.get(commandDirectory.getServerDir()))
@@ -31,15 +31,14 @@ public class Refresh implements CommandWork {
             e.printStackTrace();
         }
 
-        if (sb.toString().isEmpty()){
-            sb.append(Command.IS_EMPTY);
+        if (sb.toString().isEmpty()) {
+            sb.append(Command.IS_EMPTY.name());
         }
-
         return sb.toString();
     }
 
     @Override
-    public String getName() {
-        return name;
+    public String getCommandName() {
+        return command.name();
     }
 }

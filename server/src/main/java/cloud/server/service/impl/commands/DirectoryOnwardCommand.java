@@ -2,24 +2,23 @@ package cloud.server.service.impl.commands;
 
 import cloud.commands.Command;
 import cloud.server.service.CommandDirectory;
-import cloud.server.service.CommandWork;
-
+import cloud.server.service.CommandExecuter;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class DirectoryOnward implements CommandWork {
+public class DirectoryOnwardCommand implements CommandExecuter {
 
-    private String name;
     private CommandDirectory commandDirectory;
+    private Command command;
 
-    public DirectoryOnward(CommandDirectory commandDirectory) {
+    public DirectoryOnwardCommand(CommandDirectory commandDirectory) {
+        command = Command.DIRECTORY_ONWARD;
         this.commandDirectory = commandDirectory;
-        name = Command.ONWARD_SERVER;
     }
 
     @Override
-    public String commandWork(Object msg) {
+    public String commandExecute(Object msg) {
         Path path = Paths.get(commandDirectory.getServerDir() + "\\" + msg);
         if (path.toFile().isDirectory()){
             commandDirectory.setCurrentServerPath(commandDirectory.getServerDir() + "\\"  + msg);
@@ -27,7 +26,8 @@ public class DirectoryOnward implements CommandWork {
         return commandDirectory.getServerDir();
     }
 
-    public String getName() {
-        return name;
+    @Override
+    public String getCommandName() {
+        return command.name();
     }
 }

@@ -1,11 +1,17 @@
 package cloud.server.service;
 
+import io.netty.channel.ChannelHandlerContext;
+
 public interface CommandDirectory {
 
     //запускает нужную команду по названию
-    public String commandActive(String command);
+    String commandActive(Object command);
 
-    public String getServerDir();
+    String getServerDir();
 
-    public void setCurrentServerPath(String currentServerPath);
+    ChannelHandlerContext getCtx();
+
+    void setCtx(ChannelHandlerContext ctx);
+
+    void setCurrentServerPath(String currentServerPath);
 }

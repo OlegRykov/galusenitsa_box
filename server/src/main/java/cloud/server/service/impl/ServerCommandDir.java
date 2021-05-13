@@ -1,42 +1,38 @@
 package cloud.server.service.impl;
 
+import cloud.commands.CommandConst;
+import cloud.server.factory.Factory;
 import cloud.server.service.CommandDirectory;
-import cloud.server.service.CommandWork;
-import cloud.server.service.impl.commands.*;
+import cloud.server.service.CommandExecuter;
+import io.netty.channel.ChannelHandlerContext;
 
 import java.io.File;
-import java.util.Arrays;
+import java.nio.file.Paths;
 import java.util.List;
 
 public class ServerCommandDir implements CommandDirectory {
-    private String currentServerPath = "C:\\galusenitsa_box";
-    File file = new File(currentServerPath);
+    private String currentServerPath = CommandConst.SERVER_PATH;
+    private File file = new File(currentServerPath);
+    private ChannelHandlerContext ctx;
 
-
-    private List<CommandWork> commandWorksList;
-    private CommandDirectory commandDirectory;
+    private final List<CommandExecuter> commandWorksList;
 
     public ServerCommandDir() {
         file.mkdir();
-        commandDirectory = ServerCommandDir.this;
-        commandWorksList = Arrays.asList(new DirectoryBack(commandDirectory),
-                new DirectoryOnward(commandDirectory), new Refresh(commandDirectory),
-                new ServerDirectory(commandDirectory), new DeleteFile(commandDirectory),
-                new CreateFile(commandDirectory), new SaveFile(commandDirectory),
-                new SendFile(commandDirectory));
+        commandWorksList = Factory.commandWorkList(this);
     }
 
     @Override
-    public String commandActive(String command) {
+    public String commandActive(Object command) {
         int countLimit = 2;
-        String[] commandAndInfo = command.split(System.lineSeparator(), countLimit);
-        String result = null;
+        String[] commandAndInfo = command.toString().split(System.lineSeparator(), countLimit);
+        String result = "";
         for (int i = 0; i < commandWorksList.size(); i++) {
-            if (commandWorksList.get(i).getName().equals(commandAndInfo[0])) {
+            if (commandWorksList.get(i).getCommandName().equals(commandAndInfo[0])) {
                 if (commandAndInfo.length < countLimit) {
-                    result = commandWorksList.get(i).commandWork(commandAndInfo[0]);
+                    result = commandWorksList.get(i).commandExecute(commandAndInfo[0]);
                 } else {
-                    result = commandWorksList.get(i).commandWork(commandAndInfo[1]);
+                    result = commandWorksList.get(i).commandExecute(commandAndInfo[1]);
                 }
             }
         }
@@ -45,7 +41,16 @@ public class ServerCommandDir implements CommandDirectory {
 
     @Override
     public String getServerDir() {
-        return currentServerPath;
+        return Paths.get(currentServerPath).toString();
+    }
+
+    @Override
+    public void setCtx(ChannelHandlerContext ctx) {
+        this.ctx = ctx;
+    }
+
+    public ChannelHandlerContext getCtx() {
+        return ctx;
     }
 
     @Override

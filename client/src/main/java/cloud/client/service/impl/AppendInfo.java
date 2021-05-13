@@ -1,9 +1,9 @@
 package cloud.client.service.impl;
 
-import cloud.client.service.AppendText;
+import cloud.client.service.TextAppenderService;
 import javafx.scene.control.TextArea;
 
-public class AppendInfo implements AppendText
+public class AppendInfo implements TextAppenderService
 {
     @Override
     public void appendTextarea(TextArea textArea, String text) {

@@ -1,10 +1,10 @@
 package cloud.server.service;
 
-public interface CommandWork {
+public interface CommandExecuter {
 
     //запускает реализацию команды
-    public String commandWork(Object msg);
+    String commandExecute(Object msg);
 
     //возвращает название команды
-    public String getName();
+    String getCommandName();
 }
