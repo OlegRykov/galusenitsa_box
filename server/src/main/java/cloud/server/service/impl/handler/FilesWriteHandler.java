@@ -5,7 +5,6 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 
 import java.io.*;
 
-
 public class FilesWriteHandler extends ChannelInboundHandlerAdapter {
     private File file;
 
@@ -13,12 +12,11 @@ public class FilesWriteHandler extends ChannelInboundHandlerAdapter {
         this.file = file;
     }
 
-
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object sendFile) {
 
         try (OutputStream os = new BufferedOutputStream(new FileOutputStream(file, true))) {
-                os.write((byte[]) sendFile);
+            os.write((byte[]) sendFile);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

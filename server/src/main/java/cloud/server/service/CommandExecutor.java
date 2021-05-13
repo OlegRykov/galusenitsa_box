@@ -1,9 +1,9 @@
 package cloud.server.service;
 
-public interface CommandExecuter {
+public interface CommandExecutor {
 
     //запускает реализацию команды
-    String commandExecute(Object msg);
+    Object commandExecute(Object msg);
 
     //возвращает название команды
     String getCommandName();

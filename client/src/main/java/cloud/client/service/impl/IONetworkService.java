@@ -62,14 +62,12 @@ public class IONetworkService implements NetworkService {
 
     @Override
     public void sendFile(File file) {
-        new Thread(() -> {
-            try (InputStream inFile = new BufferedInputStream(new FileInputStream(file))) {
-                out.writeObject(inFile.readAllBytes());
-                out.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }).start();
+        try (InputStream inFile = new BufferedInputStream(new FileInputStream(file))) {
+            out.writeObject(inFile.readAllBytes());
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

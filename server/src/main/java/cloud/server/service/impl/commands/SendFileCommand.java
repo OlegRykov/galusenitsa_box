@@ -2,13 +2,13 @@ package cloud.server.service.impl.commands;
 
 import cloud.commands.Command;
 import cloud.server.service.CommandDirectory;
-import cloud.server.service.CommandExecuter;
+import cloud.server.service.CommandExecutor;
 import cloud.server.service.impl.handler.FilesWriteHandler;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.io.File;
 
-public class SendFileCommand implements CommandExecuter {
+public class SendFileCommand implements CommandExecutor {
     private CommandDirectory commandDirectory;
     private ChannelHandlerContext ctx;
     private Command command;
